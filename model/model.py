@@ -36,6 +36,31 @@ class DepositoStrumenti:
             :return: una lista con tutti gli strumenti presenti oppure None
         """
         # TODO
+        connection = get_connection()
+        if connection is None:
+            return None
+        cursor = connection.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT codice, tipo, marca, anno_acquisto, valore, disponibile FROM strumento")
+            rows = cursor.fetchall()
+            strumenti = []
+            for row in rows:
+                strumenti.append(Strumento(
+                    codice = row['codice'],
+                    tipo = row['tipo'],
+                    marca = row['marca'],
+                    anno_acquisto = row['anno_acquisto'],
+                    valore = row['valore'],
+                    disponibile = bool(row['disponibile'])
+                ))
+            return strumenti
+        except Exception as e:
+            print(f"Errore get_strumenti: {e}")
+            return None
+        finally:
+            cursor.close()
+            connection.close()
+
 
     def cerca_strumenti_per_tipo(self, tipo) -> list[Strumento] | None:
         """
@@ -44,3 +69,31 @@ class DepositoStrumenti:
             :return: una lista con tutti gli strumenti del tipo indicato oppure None
         """
         # TODO
+        connection = get_connection()
+        if connection is None:
+            return None
+
+        cursor = connection.cursor(dictionary=True)
+        try:
+            cursor.execute(
+                "SELECT codice, tipo, marca, anno_acquisto, valore, disponibile "
+                "FROM strumento WHERE tipo = %s", (tipo,)
+            )
+            rows = cursor.fetchall()
+            strumenti = []
+            for row in rows:
+                strumenti.append(Strumento(
+                    codice=row['codice'],
+                    tipo=row['tipo'],
+                    marca=row['marca'],
+                    anno_acquisto=row['anno_acquisto'],
+                    valore=row['valore'],
+                    disponibile=bool(row['disponibile'])
+                ))
+            return strumenti
+        except Exception as e:
+            print(f"Errore cerca_strumenti_per_tipo: {e}")
+            return None
+        finally:
+            cursor.close()
+            connection.close()
